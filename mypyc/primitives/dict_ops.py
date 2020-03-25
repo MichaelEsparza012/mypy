@@ -8,13 +8,14 @@ from mypyc.ir.rtypes import dict_rprimitive, object_rprimitive, bool_rprimitive,
 from mypyc.primitives.registry import (
     name_ref_op, method_op, binary_op, func_op, custom_op,
     simple_emit, negative_int_emit, call_emit, call_negative_bool_emit,
+    name_emit,
 )
 
 
 name_ref_op('builtins.dict',
             result_type=object_rprimitive,
             error_kind=ERR_NEVER,
-            emit=simple_emit('{dest} = (PyObject *)&PyDict_Type;'),
+            emit=name_emit('(PyObject *)&PyDict_Type'),
             is_borrowed=True)
 
 dict_get_item_op = method_op(
@@ -60,7 +61,7 @@ method_op(
     arg_types=[dict_rprimitive, object_rprimitive],
     result_type=bool_rprimitive,
     error_kind=ERR_FALSE,
-    emit=simple_emit('{dest} = CPyDict_UpdateFromAny({args[0]}, {args[1]}) != -1;'))
+    emit=call_negative_bool_emit('CPyDict_UpdateFromAny'))
 
 method_op(
     name='get',
